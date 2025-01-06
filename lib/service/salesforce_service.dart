@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import '../auth/auth_service.dart';
 import '../model/task.dart';
@@ -10,7 +11,7 @@ class SalesforceService {
 
   Future<List<Task>> fetchTasks() async {
     try {
-      final url = '${_authService.instanceUrl}/services/data/v58.0/query/?q=SELECT+Id,+Subject,+Status,+Description+FROM+Task';
+      final url = '${_authService.instanceUrl}/${dotenv.env['API_ENDPOINT']!}';
       final response = await http.get(
         Uri.parse(url),
         headers: {
