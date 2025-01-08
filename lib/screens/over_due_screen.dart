@@ -1,18 +1,19 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../service/salesforce_service.dart';
 import '../auth/auth_service.dart';
 import '../model/task.dart';
 
-class TaskListScreen extends StatefulWidget {
-  const TaskListScreen({super.key});
+class overDueTask extends StatefulWidget {
+  const overDueTask({super.key});
 
   @override
-  State<TaskListScreen> createState() => _TaskListScreenState();
+  State<overDueTask> createState() => _overDueTaskState();
 }
 
-class _TaskListScreenState extends State<TaskListScreen> {
-  late Future<List<Task>> _tasksFuture;
+class _overDueTaskState extends State<overDueTask> {
+  late Future<List<Completed>> _tasksCompletedFuture;
   late AuthService _authService;
   late SalesforceService _salesforceService;
 
@@ -20,7 +21,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
   void initState() {
     super.initState();
     _authService = AuthService();
-    _tasksFuture = Future.value([]);
+    _tasksCompletedFuture = Future.value([]);
     _authenticateAndLoadTasks();
   }
 
@@ -29,7 +30,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
       await _authService.authenticate();
       _salesforceService = SalesforceService(_authService);
       setState(() {
-        _tasksFuture = _salesforceService.openFetchTasks();
+        _tasksCompletedFuture = _salesforceService.fetchCompletedTasks();
       });
     } catch (e) {
       if (kDebugMode) {
@@ -38,11 +39,12 @@ class _TaskListScreenState extends State<TaskListScreen> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder<List<Task>>(
-        future: _tasksFuture,
+      body: FutureBuilder<List<Completed>>(
+        future: _tasksCompletedFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -52,11 +54,11 @@ class _TaskListScreenState extends State<TaskListScreen> {
             return const Center(child: Text('No tasks found.'));
           }
 
-          final tasks = snapshot.data!;
+          final completedTask = snapshot.data!;
           return ListView.builder(
-            itemCount: tasks.length,
+            itemCount: completedTask.length,
             itemBuilder: (context, index) {
-              final task = tasks[index];
+              final task = completedTask[index];
               return Card(
                 child: ListTile(
                   title: Text(task.subject),
